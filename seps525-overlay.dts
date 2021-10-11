@@ -1,0 +1,80 @@
+/*
+ * SEPS525
+ *
+ */
+
+/dts-v1/;
+/plugin/;
+
+/ {
+        compatible = "brcm,bcm2835";
+
+	fragment@0 {
+		target = <&spi0>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@1 {
+		target = <&spidev0>;
+		__overlay__ {
+			status = "disabled";
+		};
+	};
+
+	fragment@2 {
+		target = <&spidev1>;
+		__overlay__ {
+			status = "disabled";
+		};
+	};
+
+        fragment@3 {
+                target = <&gpio>;
+                __overlay__ {
+                        seps525_pins: seps525_pins {
+                                brcm,pins = <24 25>;
+                                brcm,function = <1 1>; /* out out */
+                        };
+                };
+        };
+
+        fragment@4 {
+                target = <&spi0>;
+                __overlay__ {
+                        /* needed to avoid dtc warning */
+                        #address-cells = <1>;
+                        #size-cells = <0>;
+
+                        seps525: seps525@0{
+                                compatible = "syncoam,seps525";
+                                reg = <0>;
+                                pinctrl-names = "default";
+                                pinctrl-0 = <&seps525_pins>;
+
+                                spi-max-frequency = <100000000>;
+                                spi-cpol;
+                                spi-cpha;
+                                rotate = <0>;
+                                fps = <100>;
+                                buswidth = <8>;
+                                txbuflen = <32768>;
+                                reset-gpios = <&gpio 24 1>;
+                                dc-gpios = <&gpio 25 0>;
+                                debug = <0>;
+                        };
+                };
+        };
+
+	__overrides__ {
+		speed = <&seps525>,"spi-max-frequency:0";
+		rotate = <&seps525>,"rotate:0";
+		txbuflen = <&seps525>,"txbuflen:0";
+		fps = <&seps525>,"fps:0";
+		bgr = <&seps525>,"bgr:0";
+		debug = <&seps525>,"debug:0";
+
+	};
+};
+
